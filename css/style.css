@@ -1,0 +1,113 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+/* Left pane: info panel */
+.info-panel {
+  width: 280px;
+  min-width: 280px;
+  padding: 20px;
+  background: #16213e;
+  border-right: 1px solid #0f3460;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-panel h1 {
+  font-size: 18px;
+  color: #e94560;
+  margin-bottom: 4px;
+}
+
+.info-section {
+  background: #0f3460;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.info-section h2 {
+  font-size: 13px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.info-section span {
+  font-size: 15px;
+  font-family: 'Courier New', monospace;
+  display: block;
+}
+
+.file-input-area {
+  border: 2px dashed #0f3460;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.file-input-area:hover,
+.file-input-area.dragover {
+  border-color: #e94560;
+}
+
+.file-input-area p {
+  font-size: 13px;
+  color: #888;
+  margin-top: 8px;
+}
+
+.file-input-area input[type="file"] {
+  display: none;
+}
+
+.file-input-area label {
+  color: #e94560;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Right pane: canvas area */
+.canvas-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.canvas-area canvas {
+  max-width: 100%;
+  max-height: 100%;
+  cursor: crosshair;
+  display: none;
+}
+
+.canvas-area canvas.visible {
+  display: block;
+}
+
+.placeholder-text {
+  color: #555;
+  font-size: 16px;
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fabric Histogram</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Left pane: info panel -->
+    <aside class="info-panel">
+      <h1>Fabric Histogram</h1>
+
+      <div class="file-input-area" id="drop-zone">
+        <label for="file-input">ファイルを選択</label>
+        <input type="file" id="file-input" accept="image/png,image/jpeg,image/gif,image/bmp">
+        <p>またはここにドラッグ＆ドロップ</p>
+      </div>
+
+      <div id="pixel-info">
+        <div class="info-section">
+          <h2>RGB</h2>
+          <span data-info="rgb">—</span>
+        </div>
+        <div class="info-section">
+          <h2>HSV</h2>
+          <span data-info="hsv">—</span>
+        </div>
+        <div class="info-section">
+          <h2>Hex</h2>
+          <span data-info="hex">—</span>
+        </div>
+        <div class="info-section">
+          <h2>座標</h2>
+          <span data-info="coords">—</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right pane: canvas -->
+    <main class="canvas-area" id="canvas-area">
+      <canvas id="image-canvas"></canvas>
+      <span class="placeholder-text" id="placeholder">画像を読み込んでください</span>
+    </main>
+  </div>
+
+  <script>window.FH = {};</script>
+  <script src="js/color-converter.js"></script>
+  <script src="js/canvas-renderer.js"></script>
+  <script src="js/image-loader.js"></script>
+  <script src="js/pixel-inspector.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var fileInput = document.getElementById('file-input');
+      var dropZone = document.getElementById('drop-zone');
+      var canvas = document.getElementById('image-canvas');
+      var infoPanel = document.getElementById('pixel-info');
+      var placeholder = document.getElementById('placeholder');
+
+      FH.ImageLoader.init(fileInput, dropZone, function (image) {
+        FH.CanvasRenderer.render(canvas, image);
+        canvas.classList.add('visible');
+        placeholder.style.display = 'none';
+      });
+
+      FH.PixelInspector.init(canvas, infoPanel);
+
+      dropZone.addEventListener('dragover', function () {
+        dropZone.classList.add('dragover');
+      });
+      dropZone.addEventListener('dragleave', function () {
+        dropZone.classList.remove('dragover');
+      });
+      dropZone.addEventListener('drop', function () {
+        dropZone.classList.remove('dragover');
+      });
+    })();
+  </script>
+</body>
+</html>
