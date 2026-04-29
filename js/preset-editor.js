@@ -4,11 +4,20 @@
   var modal;
   var listEl;
   var presetSelectEl;
+  var vizHsvEl, vizRgbEl;
+  var wheelCanvas, vbarCanvas, rgbRCanvas, rgbGCanvas, rgbBCanvas;
 
   function init(triggerBtn, modalEl) {
     modal = modalEl;
     listEl = modal.querySelector('[data-pe="list"]');
     presetSelectEl = modal.querySelector('[data-pe="active-select"]');
+    vizHsvEl = modal.querySelector('[data-pe="viz-hsv"]');
+    vizRgbEl = modal.querySelector('[data-pe="viz-rgb"]');
+    wheelCanvas = modal.querySelector('[data-pe="wheel"]');
+    vbarCanvas = modal.querySelector('[data-pe="vbar"]');
+    rgbRCanvas = modal.querySelector('[data-pe="rgb-r"]');
+    rgbGCanvas = modal.querySelector('[data-pe="rgb-g"]');
+    rgbBCanvas = modal.querySelector('[data-pe="rgb-b"]');
 
     triggerBtn.addEventListener('click', open);
 
@@ -88,11 +97,36 @@
 
   function render() {
     renderPresetSelect();
+    renderVisualizers();
     if (!listEl) return;
     listEl.innerHTML = '';
     var all = FH.ColorPresets.getAll();
     for (var i = 0; i < all.length; i++) {
       listEl.appendChild(buildRow(all[i]));
+    }
+  }
+
+  function renderVisualizers() {
+    if (!FH.PresetVisualizer || !wheelCanvas) return;
+    var cats = FH.ColorPresets.getStored();
+    var hasHsv = false, hasRgb = false;
+    for (var i = 0; i < cats.length; i++) {
+      var c = cats[i];
+      if (c.kind !== 'chromatic') continue;
+      if (c.rangeMode === 'rgb') hasRgb = true;
+      else hasHsv = true;
+    }
+    if (vizHsvEl) vizHsvEl.style.display = hasHsv ? '' : 'none';
+    if (vizRgbEl) vizRgbEl.style.display = hasRgb ? '' : 'none';
+
+    if (hasHsv) {
+      FH.PresetVisualizer.drawWheel(wheelCanvas, cats);
+      FH.PresetVisualizer.drawVBar(vbarCanvas, cats);
+    }
+    if (hasRgb) {
+      FH.PresetVisualizer.drawRgbChannel(rgbRCanvas, 'r', cats);
+      FH.PresetVisualizer.drawRgbChannel(rgbGCanvas, 'g', cats);
+      FH.PresetVisualizer.drawRgbChannel(rgbBCanvas, 'b', cats);
     }
   }
 
@@ -129,6 +163,7 @@
     if (p.kind === 'chromatic') {
       row.appendChild(buildModeToggle(p));
       row.appendChild(buildRangeFields(p));
+      row.appendChild(buildInlineBar(p));
       row.appendChild(buildDeleteBtn(p.id));
     } else {
       var lock = document.createElement('span');
@@ -209,6 +244,21 @@
       FH.ColorPresets.update(p.id, patch);
     });
     return input;
+  }
+
+  function buildInlineBar(p) {
+    var canvas = document.createElement('canvas');
+    canvas.className = 'preset-inline-bar';
+    if (p.rangeMode === 'rgb') {
+      canvas.width = 160;
+      canvas.height = 30;
+      if (FH.PresetVisualizer) FH.PresetVisualizer.drawInlineRgbBar(canvas, p);
+    } else {
+      canvas.width = 160;
+      canvas.height = 14;
+      if (FH.PresetVisualizer) FH.PresetVisualizer.drawInlineHueBar(canvas, p);
+    }
+    return canvas;
   }
 
   function buildDeleteBtn(id) {

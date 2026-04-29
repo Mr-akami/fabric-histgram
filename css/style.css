@@ -367,6 +367,65 @@ body {
   font-size: 12px;
 }
 
+.preset-viz {
+  padding: 12px 18px;
+  border-bottom: 1px solid #0f3460;
+  background: #0d1a30;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.viz-block {
+  flex: 1;
+  min-width: 280px;
+}
+
+.viz-block h3 {
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.viz-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.viz-vbar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.viz-axis-label {
+  font-size: 10px;
+  color: #888;
+}
+
+.viz-rgb-stack {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+.viz-rgb-stack label {
+  font-size: 11px;
+  color: #999;
+  font-family: 'Courier New', monospace;
+}
+
+.preset-inline-bar {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
 .preset-list {
   padding: 12px 18px;
   overflow-y: auto;

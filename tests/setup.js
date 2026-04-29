@@ -25,6 +25,26 @@ HTMLCanvasElement.prototype.getContext = (function (original) {
           putImageData: function () {},
           clearRect: function () {},
           fillRect: function () {},
+          strokeRect: function () {},
+          beginPath: function () {},
+          closePath: function () {},
+          arc: function () {},
+          moveTo: function () {},
+          lineTo: function () {},
+          stroke: function () {},
+          fill: function () {},
+          createLinearGradient: function () {
+            return { addColorStop: function () {} };
+          },
+          createRadialGradient: function () {
+            return { addColorStop: function () {} };
+          },
+          set fillStyle(v) { this._fillStyle = v; },
+          get fillStyle() { return this._fillStyle; },
+          set strokeStyle(v) { this._strokeStyle = v; },
+          get strokeStyle() { return this._strokeStyle; },
+          set lineWidth(v) { this._lineWidth = v; },
+          get lineWidth() { return this._lineWidth; },
         };
       }
       return this._mockCtx;

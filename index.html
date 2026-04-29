@@ -85,6 +85,26 @@
           <button class="action-btn" data-pe="rename-preset">リネーム</button>
           <button class="action-btn" data-pe="delete-preset">削除</button>
         </div>
+        <div class="preset-viz" data-pe="viz">
+          <div class="viz-block" data-pe="viz-hsv">
+            <h3>HSV カバレッジ</h3>
+            <div class="viz-row">
+              <canvas data-pe="wheel" width="240" height="240"></canvas>
+              <div class="viz-vbar-wrap">
+                <span class="viz-axis-label">V</span>
+                <canvas data-pe="vbar" width="36" height="240"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="viz-block" data-pe="viz-rgb">
+            <h3>RGB カバレッジ</h3>
+            <div class="viz-rgb-stack">
+              <label>R</label><canvas data-pe="rgb-r" width="280" height="20"></canvas>
+              <label>G</label><canvas data-pe="rgb-g" width="280" height="20"></canvas>
+              <label>B</label><canvas data-pe="rgb-b" width="280" height="20"></canvas>
+            </div>
+          </div>
+        </div>
         <div class="preset-list" data-pe="list"></div>
         <footer class="preset-dialog-footer">
           <button class="action-btn" data-pe="add">+ カテゴリ追加</button>
@@ -105,6 +125,7 @@
   <script src="js/histogram-analyzer.js"></script>
   <script src="js/histogram-panel.js"></script>
   <script src="js/area-report.js"></script>
+  <script src="js/preset-visualizer.js"></script>
   <script src="js/preset-editor.js"></script>
   <script>
     (function () {

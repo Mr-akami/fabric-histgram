@@ -163,3 +163,36 @@ describe('FH.ColorConverter.rgbToHex', () => {
     expect(rgbToHex(15, 15, 15)).toBe('#0F0F0F');
   });
 });
+
+describe('FH.ColorConverter.hsvToRgb', () => {
+  const hsvToRgb = (h, s, v) => FH.ColorConverter.hsvToRgb(h, s, v);
+
+  test('pure red (0, 100, 100)', () => {
+    expect(hsvToRgb(0, 100, 100)).toEqual({ r: 255, g: 0, b: 0 });
+  });
+
+  test('pure green (120, 100, 100)', () => {
+    expect(hsvToRgb(120, 100, 100)).toEqual({ r: 0, g: 255, b: 0 });
+  });
+
+  test('pure blue (240, 100, 100)', () => {
+    expect(hsvToRgb(240, 100, 100)).toEqual({ r: 0, g: 0, b: 255 });
+  });
+
+  test('white (any, 0, 100)', () => {
+    expect(hsvToRgb(0, 0, 100)).toEqual({ r: 255, g: 255, b: 255 });
+  });
+
+  test('black (any, any, 0)', () => {
+    expect(hsvToRgb(180, 50, 0)).toEqual({ r: 0, g: 0, b: 0 });
+  });
+
+  test('round-trip via rgbToHsv', () => {
+    const orig = { r: 200, g: 100, b: 50 };
+    const hsv = FH.ColorConverter.rgbToHsv(orig.r, orig.g, orig.b);
+    const back = hsvToRgb(hsv.h, hsv.s, hsv.v);
+    expect(Math.abs(back.r - orig.r)).toBeLessThanOrEqual(2);
+    expect(Math.abs(back.g - orig.g)).toBeLessThanOrEqual(2);
+    expect(Math.abs(back.b - orig.b)).toBeLessThanOrEqual(2);
+  });
+});
