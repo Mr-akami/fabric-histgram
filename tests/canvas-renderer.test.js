@@ -1,5 +1,5 @@
 import { loadScript } from './helpers/load-script.js';
-import { describe, test, expect, beforeAll, beforeEach } from 'vitest';
+import { describe, test, expect, beforeAll, beforeEach, vi } from 'vitest';
 
 beforeAll(() => {
   window.FH = {};
@@ -141,5 +141,43 @@ describe('FH.CanvasRenderer.getPixelAt', () => {
 
     expect(Number.isInteger(result.x)).toBe(true);
     expect(Number.isInteger(result.y)).toBe(true);
+  });
+});
+
+describe('FH.CanvasRenderer.getFullImageData', () => {
+  test('should call getImageData with full canvas dimensions', () => {
+    const canvas = createMockCanvas(500, 400);
+    const image = createMockImage(200, 150);
+    FH.CanvasRenderer.render(canvas, image);
+
+    const ctx = canvas.getContext('2d');
+    const spy = vi.spyOn(ctx, 'getImageData').mockReturnValue({
+      data: new Uint8ClampedArray(200 * 150 * 4),
+      width: 200,
+      height: 150,
+    });
+
+    FH.CanvasRenderer.getFullImageData();
+
+    expect(spy).toHaveBeenCalledWith(0, 0, 200, 150);
+  });
+
+  test('should return ImageData object from context', () => {
+    const canvas = createMockCanvas(500, 400);
+    const image = createMockImage(100, 80);
+    FH.CanvasRenderer.render(canvas, image);
+
+    const ctx = canvas.getContext('2d');
+    const fakeData = {
+      data: new Uint8ClampedArray(100 * 80 * 4),
+      width: 100,
+      height: 80,
+    };
+    vi.spyOn(ctx, 'getImageData').mockReturnValue(fakeData);
+
+    const result = FH.CanvasRenderer.getFullImageData();
+
+    expect(result).toBe(fakeData);
+    expect(result.data.length).toBe(100 * 80 * 4);
   });
 });

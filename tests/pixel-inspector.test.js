@@ -5,6 +5,7 @@ beforeAll(() => {
   window.FH = {};
   loadModules([
     'js/color-converter.js',
+    'js/color-classifier.js',
     'js/canvas-renderer.js',
     'js/pixel-inspector.js',
   ]);
@@ -17,6 +18,18 @@ function createInfoPanel() {
     <span data-info="hsv"></span>
     <span data-info="hex"></span>
     <span data-info="coords"></span>
+  `;
+  return panel;
+}
+
+function createInfoPanelWithCategory() {
+  const panel = document.createElement('div');
+  panel.innerHTML = `
+    <span data-info="rgb"></span>
+    <span data-info="hsv"></span>
+    <span data-info="hex"></span>
+    <span data-info="coords"></span>
+    <span data-info="category"></span>
   `;
   return panel;
 }
@@ -138,5 +151,63 @@ describe('click event handling', () => {
     canvas.dispatchEvent(clickEvent);
 
     expect(getPixelSpy).toHaveBeenCalledWith(77, 33);
+  });
+});
+
+describe('color category display', () => {
+  test('should display color category name when data-info="category" element exists', () => {
+    const canvas = createMockCanvas(100, 100);
+    canvas.width = 100;
+    canvas.height = 100;
+    const infoPanel = createInfoPanelWithCategory();
+
+    vi.spyOn(FH.CanvasRenderer, 'getPixelAt').mockReturnValue({
+      r: 255, g: 0, b: 0, x: 50, y: 50,
+    });
+
+    FH.PixelInspector.init(canvas, infoPanel);
+
+    const clickEvent = new MouseEvent('click', { offsetX: 50, offsetY: 50 });
+    canvas.dispatchEvent(clickEvent);
+
+    const categoryEl = infoPanel.querySelector('[data-info="category"]');
+    expect(categoryEl.textContent).toContain('赤');
+  });
+
+  test('should not throw when data-info="category" element is absent', () => {
+    const canvas = createMockCanvas(100, 100);
+    canvas.width = 100;
+    canvas.height = 100;
+    const infoPanel = createInfoPanel();
+
+    vi.spyOn(FH.CanvasRenderer, 'getPixelAt').mockReturnValue({
+      r: 0, g: 255, b: 0, x: 10, y: 10,
+    });
+
+    FH.PixelInspector.init(canvas, infoPanel);
+
+    expect(function () {
+      const clickEvent = new MouseEvent('click', { offsetX: 10, offsetY: 10 });
+      canvas.dispatchEvent(clickEvent);
+    }).not.toThrow();
+  });
+
+  test('should display green category for green pixel', () => {
+    const canvas = createMockCanvas(100, 100);
+    canvas.width = 100;
+    canvas.height = 100;
+    const infoPanel = createInfoPanelWithCategory();
+
+    vi.spyOn(FH.CanvasRenderer, 'getPixelAt').mockReturnValue({
+      r: 0, g: 255, b: 0, x: 25, y: 25,
+    });
+
+    FH.PixelInspector.init(canvas, infoPanel);
+
+    const clickEvent = new MouseEvent('click', { offsetX: 25, offsetY: 25 });
+    canvas.dispatchEvent(clickEvent);
+
+    const categoryEl = infoPanel.querySelector('[data-info="category"]');
+    expect(categoryEl.textContent).toContain('緑');
   });
 });

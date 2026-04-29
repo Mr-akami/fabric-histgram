@@ -10,6 +10,7 @@
     var hsvEl = infoPanel.querySelector('[data-info="hsv"]');
     var hexEl = infoPanel.querySelector('[data-info="hex"]');
     var coordsEl = infoPanel.querySelector('[data-info="coords"]');
+    var categoryEl = infoPanel.querySelector('[data-info="category"]');
 
     canvas.addEventListener('click', function (e) {
       var pixel = FH.CanvasRenderer.getPixelAt(e.offsetX, e.offsetY);
@@ -20,6 +21,11 @@
       hsvEl.textContent = 'H: ' + hsv.h + '°, S: ' + hsv.s + '%, V: ' + hsv.v + '%';
       hexEl.textContent = hex;
       coordsEl.textContent = '(' + pixel.x + ', ' + pixel.y + ')';
+
+      if (categoryEl && FH.ColorClassifier) {
+        var cat = FH.ColorClassifier.classify(pixel.r, pixel.g, pixel.b);
+        categoryEl.textContent = cat.name;
+      }
     });
   }
 

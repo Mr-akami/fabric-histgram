@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fabric Histogram</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <div class="app">
@@ -35,6 +36,16 @@
           <h2>座標</h2>
           <span data-info="coords">—</span>
         </div>
+        <div class="info-section">
+          <h2>色カテゴリ</h2>
+          <span data-info="category">—</span>
+        </div>
+      </div>
+
+      <div id="area-report"></div>
+
+      <div class="report-actions" id="report-actions" style="display: none;">
+        <button id="print-report" class="action-btn">印刷</button>
       </div>
     </aside>
 
@@ -43,13 +54,23 @@
       <canvas id="image-canvas"></canvas>
       <span class="placeholder-text" id="placeholder">画像を読み込んでください</span>
     </main>
+
+    <!-- Floating histogram panel -->
+    <div class="histogram-panel" id="histogram-panel" style="display: none;"></div>
+
+    <!-- Histogram toggle button -->
+    <button class="histogram-toggle" id="histogram-toggle">📊 ヒストグラム</button>
   </div>
 
   <script>window.FH = {};</script>
   <script src="js/color-converter.js"></script>
+  <script src="js/color-classifier.js"></script>
   <script src="js/canvas-renderer.js"></script>
   <script src="js/image-loader.js"></script>
   <script src="js/pixel-inspector.js"></script>
+  <script src="js/histogram-analyzer.js"></script>
+  <script src="js/histogram-panel.js"></script>
+  <script src="js/area-report.js"></script>
   <script>
     (function () {
       'use strict';
@@ -59,11 +80,26 @@
       var canvas = document.getElementById('image-canvas');
       var infoPanel = document.getElementById('pixel-info');
       var placeholder = document.getElementById('placeholder');
+      var histogramPanel = document.getElementById('histogram-panel');
+      var histogramToggle = document.getElementById('histogram-toggle');
+      var areaReport = document.getElementById('area-report');
+      var printButton = document.getElementById('print-report');
+      var reportActions = document.getElementById('report-actions');
+
+      FH.HistogramPanel.init(histogramPanel, histogramToggle);
+      FH.AreaReport.init(areaReport, printButton);
 
       FH.ImageLoader.init(fileInput, dropZone, function (image) {
         FH.CanvasRenderer.render(canvas, image);
         canvas.classList.add('visible');
         placeholder.style.display = 'none';
+
+        var fullData = FH.CanvasRenderer.getFullImageData();
+        var histData = FH.HistogramAnalyzer.analyze(fullData);
+        FH.HistogramPanel.render(histData);
+
+        FH.AreaReport.analyze(fullData);
+        reportActions.style.display = 'block';
       });
 
       FH.PixelInspector.init(canvas, infoPanel);

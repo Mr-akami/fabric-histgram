@@ -111,3 +111,167 @@ body {
   color: #555;
   font-size: 16px;
 }
+
+/* Area report */
+#area-report h2 {
+  font-size: 14px;
+  color: #e94560;
+  margin-bottom: 8px;
+}
+
+.area-report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.area-report-table th,
+.area-report-table td {
+  padding: 4px 8px;
+  text-align: left;
+  border-bottom: 1px solid #0f3460;
+}
+
+.area-report-table th {
+  color: #999;
+  font-weight: normal;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.area-report-table td:last-child {
+  text-align: right;
+  font-family: 'Courier New', monospace;
+}
+
+/* Report actions */
+.report-actions {
+  padding-top: 4px;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 8px 16px;
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #e94560;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.action-btn:hover {
+  background: #e94560;
+  color: #fff;
+}
+
+/* Histogram floating panel */
+.histogram-panel {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 360px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 10px;
+  padding: 16px;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.histogram-panel h3 {
+  font-size: 14px;
+  color: #e94560;
+  margin-bottom: 12px;
+}
+
+.histogram-chart-wrapper {
+  margin-bottom: 12px;
+  height: 100px;
+}
+
+.histogram-chart-title {
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Histogram toggle button */
+.histogram-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 101;
+  padding: 8px 14px;
+  background: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #e94560;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.histogram-toggle:hover {
+  background: #e94560;
+  color: #fff;
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+    height: auto;
+    overflow: visible;
+  }
+
+  .app {
+    display: block;
+    height: auto;
+  }
+
+  .info-panel {
+    width: 100%;
+    min-width: 0;
+    background: #fff;
+    border: none;
+    padding: 10px;
+  }
+
+  .canvas-area,
+  .file-input-area,
+  .histogram-panel,
+  .histogram-toggle,
+  .report-actions {
+    display: none !important;
+  }
+
+  .info-section {
+    background: #f5f5f5;
+  }
+
+  .info-section h2 {
+    color: #666;
+  }
+
+  #area-report h2 {
+    color: #333;
+  }
+
+  .area-report-table th {
+    color: #666;
+  }
+
+  .area-report-table th,
+  .area-report-table td {
+    border-bottom-color: #ddd;
+  }
+}

@@ -42,8 +42,14 @@
     };
   }
 
+  /** @returns {{ data: Uint8ClampedArray, width: number, height: number }} */
+  function getFullImageData() {
+    return currentCtx.getImageData(0, 0, currentCanvas.width, currentCanvas.height);
+  }
+
   FH.CanvasRenderer = {
     render: render,
     getPixelAt: getPixelAt,
+    getFullImageData: getFullImageData,
   };
 })(window.FH);
