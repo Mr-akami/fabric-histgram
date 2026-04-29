@@ -17,6 +17,7 @@
     var assignSectionEl = infoPanel.querySelector('[data-info="assign-section"]');
 
     var lastHsv = null;
+    var lastRgb = null;
 
     function renderAssignOptions() {
       if (!assignSelectEl || !FH.ColorPresets) return;
@@ -41,10 +42,11 @@
 
     if (assignBtnEl) {
       assignBtnEl.addEventListener('click', function () {
-        if (!lastHsv || !assignSelectEl) return;
+        if (!lastHsv || !lastRgb || !assignSelectEl) return;
         var id = assignSelectEl.value;
         if (!id) return;
-        FH.ColorPresets.expandRange(id, lastHsv.h, lastHsv.s, lastHsv.v);
+        FH.ColorPresets.expandRange(id, lastHsv.h, lastHsv.s, lastHsv.v,
+                                    lastRgb.r, lastRgb.g, lastRgb.b);
         if (assignNoteEl) {
           var p = FH.ColorPresets.getById(id);
           assignNoteEl.textContent = '「' + (p ? p.name : id) + '」に追加しました';
@@ -58,6 +60,7 @@
       var hex = FH.ColorConverter.rgbToHex(pixel.r, pixel.g, pixel.b);
 
       lastHsv = hsv;
+      lastRgb = { r: pixel.r, g: pixel.g, b: pixel.b };
 
       rgbEl.textContent = 'R: ' + pixel.r + ', G: ' + pixel.g + ', B: ' + pixel.b;
       hsvEl.textContent = 'H: ' + hsv.h + '°, S: ' + hsv.s + '%, V: ' + hsv.v + '%';

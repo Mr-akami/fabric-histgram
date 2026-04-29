@@ -74,13 +74,21 @@
     <div class="preset-modal" id="preset-modal" style="display: none;">
       <div class="preset-dialog">
         <header class="preset-dialog-header">
-          <h2>カテゴリプリセット編集</h2>
+          <h2>プリセット編集</h2>
           <button class="preset-close" data-pe="close" aria-label="閉じる">×</button>
         </header>
+        <div class="preset-selector">
+          <label>プリセット:</label>
+          <select data-pe="active-select"></select>
+          <button class="action-btn" data-pe="new-preset">+ 新規</button>
+          <button class="action-btn" data-pe="duplicate-preset">複製</button>
+          <button class="action-btn" data-pe="rename-preset">リネーム</button>
+          <button class="action-btn" data-pe="delete-preset">削除</button>
+        </div>
         <div class="preset-list" data-pe="list"></div>
         <footer class="preset-dialog-footer">
-          <button class="action-btn" data-pe="add">+ 追加</button>
-          <button class="action-btn" data-pe="reset">デフォルトに戻す</button>
+          <button class="action-btn" data-pe="add">+ カテゴリ追加</button>
+          <button class="action-btn" data-pe="reset">このプリセットをデフォルトに戻す</button>
           <button class="action-btn" data-pe="close">閉じる</button>
         </footer>
       </div>

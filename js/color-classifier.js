@@ -34,7 +34,7 @@
     }
 
     for (var j = 0; j < presets.length; j++) {
-      if (FH.ColorPresets.matchHsv(presets[j], hsv.h, hsv.s, hsv.v)) {
+      if (FH.ColorPresets.matchPixel(presets[j], r, g, b, hsv.h, hsv.s, hsv.v)) {
         return presetToCategory(presets[j]);
       }
     }

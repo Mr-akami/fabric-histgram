@@ -6,8 +6,21 @@ HTMLCanvasElement.prototype.getContext = (function (original) {
       if (!this._mockCtx) {
         this._mockCtx = {
           drawImage: function () {},
-          getImageData: function () {
-            return { data: new Uint8ClampedArray([0, 0, 0, 255]) };
+          getImageData: function (sx, sy, sw, sh) {
+            var w = sw || 1;
+            var h = sh || 1;
+            return {
+              data: new Uint8ClampedArray(w * h * 4),
+              width: w,
+              height: h,
+            };
+          },
+          createImageData: function (w, h) {
+            return {
+              data: new Uint8ClampedArray((w || 1) * (h || 1) * 4),
+              width: w || 1,
+              height: h || 1,
+            };
           },
           putImageData: function () {},
           clearRect: function () {},

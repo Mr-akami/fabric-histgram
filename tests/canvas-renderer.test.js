@@ -144,29 +144,60 @@ describe('FH.CanvasRenderer.getPixelAt', () => {
   });
 });
 
-describe('FH.CanvasRenderer.getFullImageData', () => {
-  test('should call getImageData with full canvas dimensions', () => {
+describe('FH.CanvasRenderer highlight', () => {
+  test('highlightCategory toggles highlightedKey', () => {
     const canvas = createMockCanvas(500, 400);
-    const image = createMockImage(200, 150);
-    FH.CanvasRenderer.render(canvas, image);
+    const ctx = canvas.getContext('2d');
+    const data = new Uint8ClampedArray(4 * 4); // 2x2
+    vi.spyOn(ctx, 'getImageData').mockReturnValue({ data, width: 2, height: 2 });
+    const image = createMockImage(2, 2);
 
+    // Need a classifier to be present for highlightCategory to call
+    window.FH.ColorClassifier = { classify: () => ({ key: 'red' }) };
+
+    FH.CanvasRenderer.render(canvas, image);
+    FH.CanvasRenderer.highlightCategory('red');
+    expect(FH.CanvasRenderer.getHighlightedKey()).toBe('red');
+
+    FH.CanvasRenderer.highlightCategory('red'); // toggle off
+    expect(FH.CanvasRenderer.getHighlightedKey()).toBeNull();
+  });
+
+  test('clearHighlight resets state', () => {
+    const canvas = createMockCanvas(500, 400);
+    const ctx = canvas.getContext('2d');
+    vi.spyOn(ctx, 'getImageData').mockReturnValue({
+      data: new Uint8ClampedArray(4), width: 1, height: 1,
+    });
+    const image = createMockImage(1, 1);
+    window.FH.ColorClassifier = { classify: () => ({ key: 'red' }) };
+
+    FH.CanvasRenderer.render(canvas, image);
+    FH.CanvasRenderer.highlightCategory('red');
+    FH.CanvasRenderer.clearHighlight();
+    expect(FH.CanvasRenderer.getHighlightedKey()).toBeNull();
+  });
+});
+
+describe('FH.CanvasRenderer.getFullImageData', () => {
+  test('should capture full canvas pixels during render', () => {
+    const canvas = createMockCanvas(500, 400);
     const ctx = canvas.getContext('2d');
     const spy = vi.spyOn(ctx, 'getImageData').mockReturnValue({
       data: new Uint8ClampedArray(200 * 150 * 4),
       width: 200,
       height: 150,
     });
+    const image = createMockImage(200, 150);
 
+    FH.CanvasRenderer.render(canvas, image);
     FH.CanvasRenderer.getFullImageData();
 
     expect(spy).toHaveBeenCalledWith(0, 0, 200, 150);
   });
 
-  test('should return ImageData object from context', () => {
+  test('should return cached ImageData with full dimensions', () => {
     const canvas = createMockCanvas(500, 400);
-    const image = createMockImage(100, 80);
-    FH.CanvasRenderer.render(canvas, image);
-
     const ctx = canvas.getContext('2d');
     const fakeData = {
       data: new Uint8ClampedArray(100 * 80 * 4),
@@ -174,7 +205,9 @@ describe('FH.CanvasRenderer.getFullImageData', () => {
       height: 80,
     };
     vi.spyOn(ctx, 'getImageData').mockReturnValue(fakeData);
+    const image = createMockImage(100, 80);
 
+    FH.CanvasRenderer.render(canvas, image);
     const result = FH.CanvasRenderer.getFullImageData();
 
     expect(result).toBe(fakeData);

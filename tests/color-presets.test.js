@@ -28,7 +28,9 @@ describe('FH.ColorPresets', () => {
       FH.ColorPresets.getStored();
       const raw = window.localStorage.getItem(FH.ColorPresets.STORAGE_KEY);
       expect(raw).toBeTruthy();
-      expect(JSON.parse(raw).length).toBe(9);
+      const parsed = JSON.parse(raw);
+      expect(parsed.presets.length).toBe(1);
+      expect(parsed.presets[0].categories.length).toBe(9);
     });
 
     test('contains all expected default keys', () => {
@@ -204,6 +206,120 @@ describe('FH.ColorPresets', () => {
       FH.ColorPresets._resetMemory();
       const list = FH.ColorPresets.getStored();
       expect(list.some((p) => p.name === 'persist')).toBe(true);
+    });
+
+    test('migrates v1 array into a default preset', () => {
+      const v1 = [{ id: 'red', name: '赤系', displayColor: '#ff0000', kind: 'chromatic',
+        hMin: 0, hMax: 10, sMin: 0, sMax: 100, vMin: 0, vMax: 100 }];
+      window.localStorage.setItem(FH.ColorPresets.STORAGE_KEY_V1, JSON.stringify(v1));
+      FH.ColorPresets._resetMemory();
+      const cats = FH.ColorPresets.getStored();
+      expect(cats.length).toBe(1);
+      expect(cats[0].id).toBe('red');
+      expect(FH.ColorPresets.getAllPresets().length).toBe(1);
+    });
+  });
+
+  describe('RGB range mode', () => {
+    test('add defaults to hsv rangeMode', () => {
+      const cat = FH.ColorPresets.add({ name: 'x', displayColor: '#fff' });
+      expect(cat.rangeMode).toBe('hsv');
+    });
+
+    test('update can switch rangeMode to rgb', () => {
+      const cat = FH.ColorPresets.add({ name: 'x', displayColor: '#fff' });
+      FH.ColorPresets.update(cat.id, { rangeMode: 'rgb', rMin: 100, rMax: 200 });
+      const after = FH.ColorPresets.getById(cat.id);
+      expect(after.rangeMode).toBe('rgb');
+      expect(after.rMin).toBe(100);
+      expect(after.rMax).toBe(200);
+    });
+
+    test('matchPixel uses RGB when mode is rgb', () => {
+      const cat = FH.ColorPresets.add({
+        name: 'x', displayColor: '#fff', rangeMode: 'rgb',
+        rMin: 100, rMax: 200, gMin: 0, gMax: 50, bMin: 0, bMax: 50,
+      });
+      expect(FH.ColorPresets.matchPixel(cat, 150, 30, 30, 0, 80, 60)).toBe(true);
+      expect(FH.ColorPresets.matchPixel(cat, 50, 30, 30, 0, 80, 20)).toBe(false);
+    });
+
+    test('matchHsv returns false on rgb-mode preset', () => {
+      const cat = FH.ColorPresets.add({
+        name: 'x', displayColor: '#fff', rangeMode: 'rgb',
+        rMin: 0, rMax: 255, gMin: 0, gMax: 255, bMin: 0, bMax: 255,
+      });
+      expect(FH.ColorPresets.matchHsv(cat, 100, 50, 50)).toBe(false);
+    });
+
+    test('expandRange uses RGB when mode is rgb', () => {
+      const cat = FH.ColorPresets.add({
+        name: 'x', displayColor: '#fff', rangeMode: 'rgb',
+        rMin: 100, rMax: 110, gMin: 100, gMax: 110, bMin: 100, bMax: 110,
+      });
+      FH.ColorPresets.expandRange(cat.id, 0, 0, 0, 200, 50, 90);
+      const after = FH.ColorPresets.getById(cat.id);
+      expect(after.rMax).toBe(200);
+      expect(after.gMin).toBe(50);
+      expect(after.bMin).toBe(90);
+    });
+  });
+
+  describe('preset-set operations', () => {
+    test('starts with one default preset', () => {
+      const presets = FH.ColorPresets.getAllPresets();
+      expect(presets.length).toBe(1);
+      expect(presets[0].isActive).toBe(true);
+    });
+
+    test('createPreset adds a new preset and activates it', () => {
+      const newId = FH.ColorPresets.createPreset('布地A');
+      const presets = FH.ColorPresets.getAllPresets();
+      expect(presets.length).toBe(2);
+      expect(FH.ColorPresets.getActivePresetId()).toBe(newId);
+      expect(presets.find((p) => p.id === newId).name).toBe('布地A');
+    });
+
+    test('createPreset copies categories from active by default', () => {
+      FH.ColorPresets.add({ name: 'unique', displayColor: '#fff', hMin: 0, hMax: 10 });
+      const newId = FH.ColorPresets.createPreset('copy');
+      const cats = FH.ColorPresets.getStored();
+      expect(cats.some((c) => c.name === 'unique')).toBe(true);
+    });
+
+    test('setActive switches active preset', () => {
+      const newId = FH.ColorPresets.createPreset('B');
+      FH.ColorPresets.setActive('default');
+      expect(FH.ColorPresets.getActivePresetId()).toBe('default');
+      FH.ColorPresets.setActive(newId);
+      expect(FH.ColorPresets.getActivePresetId()).toBe(newId);
+    });
+
+    test('deletePreset removes preset and switches active when needed', () => {
+      const newId = FH.ColorPresets.createPreset('temp');
+      expect(FH.ColorPresets.getActivePresetId()).toBe(newId);
+      FH.ColorPresets.deletePreset(newId);
+      expect(FH.ColorPresets.getAllPresets().length).toBe(1);
+      expect(FH.ColorPresets.getActivePresetId()).toBe('default');
+    });
+
+    test('deletePreset rejects when only one preset remains', () => {
+      const ok = FH.ColorPresets.deletePreset('default');
+      expect(ok).toBe(false);
+    });
+
+    test('renamePreset updates name', () => {
+      FH.ColorPresets.renamePreset('default', '主');
+      expect(FH.ColorPresets.getAllPresets()[0].name).toBe('主');
+    });
+
+    test('category edits only affect active preset', () => {
+      FH.ColorPresets.createPreset('B');
+      // active = B, modify
+      FH.ColorPresets.update('red', { name: 'B-red' });
+      // switch back
+      FH.ColorPresets.setActive('default');
+      expect(FH.ColorPresets.getById('red').name).toBe('赤系');
     });
   });
 });

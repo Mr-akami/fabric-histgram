@@ -55,6 +55,9 @@
       counts[cat.key]++;
     }
 
+    var activeKey = (FH.CanvasRenderer && FH.CanvasRenderer.getHighlightedKey)
+      ? FH.CanvasRenderer.getHighlightedKey() : null;
+
     var html = '<h2>面積率レポート</h2><table class="area-report-table">';
     html += '<tr><th></th><th>カテゴリ</th><th>面積率</th></tr>';
 
@@ -63,11 +66,32 @@
       var pct = (counts[c.key] / pixelCount) * 100;
       var display = pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1);
       var swatch = '<span class="swatch" style="background:' + escapeHtml(c.displayColor) + '"></span>';
-      html += '<tr><td>' + swatch + '</td><td>' + escapeHtml(c.name) + '</td><td>' + display + '%</td></tr>';
+      var rowCls = c.key === activeKey ? ' class="active-row"' : '';
+      html += '<tr' + rowCls + ' data-cat-key="' + escapeHtml(c.key) + '">'
+            + '<td>' + swatch + '</td>'
+            + '<td>' + escapeHtml(c.name) + '</td>'
+            + '<td>' + display + '%</td></tr>';
     }
 
     html += '</table>';
     reportContainer.innerHTML = html;
+
+    bindRowClicks();
+  }
+
+  function bindRowClicks() {
+    if (!FH.CanvasRenderer || !FH.CanvasRenderer.highlightCategory) return;
+    var rows = reportContainer.querySelectorAll('tr[data-cat-key]');
+    for (var i = 0; i < rows.length; i++) {
+      (function (row) {
+        row.addEventListener('click', function () {
+          var key = row.getAttribute('data-cat-key');
+          FH.CanvasRenderer.highlightCategory(key);
+          // Re-render to refresh active-row class
+          if (lastImageData) analyze(lastImageData);
+        });
+      })(rows[i]);
+    }
   }
 
   FH.AreaReport = {

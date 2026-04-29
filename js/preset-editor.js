@@ -3,22 +3,50 @@
 
   var modal;
   var listEl;
+  var presetSelectEl;
 
   function init(triggerBtn, modalEl) {
     modal = modalEl;
     listEl = modal.querySelector('[data-pe="list"]');
+    presetSelectEl = modal.querySelector('[data-pe="active-select"]');
 
     triggerBtn.addEventListener('click', open);
 
-    modal.addEventListener('click', function (e) {
-      if (e.target === modal) close();
+    modal.querySelectorAll('[data-pe="close"]').forEach(function (el) {
+      el.addEventListener('click', close);
+    });
+    modal.querySelector('[data-pe="add"]').addEventListener('click', addNewCategory);
+    modal.querySelector('[data-pe="reset"]').addEventListener('click', function () {
+      if (window.confirm('このプリセットを初期状態に戻しますか？')) {
+        FH.ColorPresets.reset();
+      }
     });
 
-    modal.querySelector('[data-pe="close"]').addEventListener('click', close);
-    modal.querySelector('[data-pe="add"]').addEventListener('click', addNew);
-    modal.querySelector('[data-pe="reset"]').addEventListener('click', function () {
-      if (window.confirm('プリセットを初期状態に戻しますか？')) {
-        FH.ColorPresets.reset();
+    presetSelectEl.addEventListener('change', function () {
+      FH.ColorPresets.setActive(presetSelectEl.value);
+    });
+    modal.querySelector('[data-pe="new-preset"]').addEventListener('click', function () {
+      var name = window.prompt('新規プリセット名:', '新規プリセット');
+      if (name) FH.ColorPresets.createPreset(name);
+    });
+    modal.querySelector('[data-pe="duplicate-preset"]').addEventListener('click', function () {
+      var current = FH.ColorPresets.getActivePreset();
+      var name = window.prompt('複製プリセット名:', current.name + ' のコピー');
+      if (name) FH.ColorPresets.createPreset(name, current.id);
+    });
+    modal.querySelector('[data-pe="rename-preset"]').addEventListener('click', function () {
+      var current = FH.ColorPresets.getActivePreset();
+      var name = window.prompt('プリセット名:', current.name);
+      if (name) FH.ColorPresets.renamePreset(current.id, name);
+    });
+    modal.querySelector('[data-pe="delete-preset"]').addEventListener('click', function () {
+      var current = FH.ColorPresets.getActivePreset();
+      if (FH.ColorPresets.getAllPresets().length <= 1) {
+        window.alert('最後のプリセットは削除できません');
+        return;
+      }
+      if (window.confirm('プリセット「' + current.name + '」を削除しますか?')) {
+        FH.ColorPresets.deletePreset(current.id);
       }
     });
 
@@ -34,7 +62,7 @@
     modal.style.display = 'none';
   }
 
-  function addNew() {
+  function addNewCategory() {
     FH.ColorPresets.add({
       name: '新規カテゴリ',
       displayColor: '#cccccc',
@@ -44,7 +72,22 @@
     });
   }
 
+  function renderPresetSelect() {
+    if (!presetSelectEl) return;
+    presetSelectEl.innerHTML = '';
+    var presets = FH.ColorPresets.getAllPresets();
+    var activeId = FH.ColorPresets.getActivePresetId();
+    for (var i = 0; i < presets.length; i++) {
+      var opt = document.createElement('option');
+      opt.value = presets[i].id;
+      opt.textContent = presets[i].name;
+      if (presets[i].id === activeId) opt.selected = true;
+      presetSelectEl.appendChild(opt);
+    }
+  }
+
   function render() {
+    renderPresetSelect();
     if (!listEl) return;
     listEl.innerHTML = '';
     var all = FH.ColorPresets.getAll();
@@ -84,6 +127,7 @@
     row.appendChild(nameInput);
 
     if (p.kind === 'chromatic') {
+      row.appendChild(buildModeToggle(p));
       row.appendChild(buildRangeFields(p));
       row.appendChild(buildDeleteBtn(p.id));
     } else {
@@ -96,12 +140,38 @@
     return row;
   }
 
+  function buildModeToggle(p) {
+    var wrap = document.createElement('div');
+    wrap.className = 'preset-mode-toggle';
+    var modes = [['hsv', 'HSV'], ['rgb', 'RGB']];
+    var current = p.rangeMode === 'rgb' ? 'rgb' : 'hsv';
+    for (var i = 0; i < modes.length; i++) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = modes[i][1];
+      btn.className = 'mode-btn' + (modes[i][0] === current ? ' active' : '');
+      (function (mode) {
+        btn.addEventListener('click', function () {
+          FH.ColorPresets.update(p.id, { rangeMode: mode });
+        });
+      })(modes[i][0]);
+      wrap.appendChild(btn);
+    }
+    return wrap;
+  }
+
   function buildRangeFields(p) {
     var wrap = document.createElement('div');
     wrap.className = 'preset-ranges';
-    wrap.appendChild(buildRangePair(p, 'h', 'H', 0, 360));
-    wrap.appendChild(buildRangePair(p, 's', 'S', 0, 100));
-    wrap.appendChild(buildRangePair(p, 'v', 'V', 0, 100));
+    if (p.rangeMode === 'rgb') {
+      wrap.appendChild(buildRangePair(p, 'r', 'R', 0, 255));
+      wrap.appendChild(buildRangePair(p, 'g', 'G', 0, 255));
+      wrap.appendChild(buildRangePair(p, 'b', 'B', 0, 255));
+    } else {
+      wrap.appendChild(buildRangePair(p, 'h', 'H', 0, 360));
+      wrap.appendChild(buildRangePair(p, 's', 'S', 0, 100));
+      wrap.appendChild(buildRangePair(p, 'v', 'V', 0, 100));
+    }
     return wrap;
   }
 
