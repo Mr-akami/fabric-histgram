@@ -5,10 +5,16 @@ beforeAll(() => {
   window.FH = {};
   loadModules([
     'js/color-converter.js',
+    'js/color-presets.js',
     'js/color-classifier.js',
     'js/canvas-renderer.js',
     'js/area-report.js',
   ]);
+});
+
+beforeEach(() => {
+  window.localStorage.clear();
+  FH.ColorPresets._resetMemory();
 });
 
 function createReportContainer() {
@@ -183,14 +189,27 @@ describe('FH.AreaReport', () => {
       // When
       FH.AreaReport.analyze(imageData);
 
-      // Then: should contain a table with category and percentage columns
+      // Then: should contain a table with swatch + category + percentage columns
       var table = container.querySelector('table');
       expect(table).not.toBeNull();
       var headers = table.querySelectorAll('th');
-      expect(headers.length).toBe(2);
+      expect(headers.length).toBe(3);
     });
 
-    test('should render 9 data rows (one per category)', () => {
+    test('should render swatch span per category', () => {
+      var imageData = createImageData([[255, 0, 0]]);
+
+      var container = createReportContainer();
+      var btn = createPrintButton();
+      FH.AreaReport.init(container, btn);
+
+      FH.AreaReport.analyze(imageData);
+
+      var swatches = container.querySelectorAll('.swatch');
+      expect(swatches.length).toBe(10);
+    });
+
+    test('should render one data row per category (defaults: 9 + OTHER)', () => {
       var imageData = createImageData([[255, 0, 0]]);
 
       var container = createReportContainer();
@@ -200,9 +219,9 @@ describe('FH.AreaReport', () => {
       // When
       FH.AreaReport.analyze(imageData);
 
-      // Then: 1 header row + 9 data rows = 10 tr elements
+      // Then: 1 header + 10 data rows
       var rows = container.querySelectorAll('tr');
-      expect(rows.length).toBe(10);
+      expect(rows.length).toBe(11);
     });
 
     test('should not call CanvasRenderer.getFullImageData internally', () => {

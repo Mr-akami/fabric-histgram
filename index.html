@@ -40,12 +40,21 @@
           <h2>色カテゴリ</h2>
           <span data-info="category">—</span>
         </div>
+        <div class="info-section assign-section" data-info="assign-section" style="display: none;">
+          <h2>カテゴリへ追加</h2>
+          <div class="assign-control">
+            <select data-info="assign-target"></select>
+            <button data-info="assign-btn" class="action-btn assign-btn">追加</button>
+          </div>
+          <span class="assign-note" data-info="assign-note"></span>
+        </div>
       </div>
 
       <div id="area-report"></div>
 
       <div class="report-actions" id="report-actions" style="display: none;">
         <button id="print-report" class="action-btn">印刷</button>
+        <button id="open-preset-editor" class="action-btn">プリセット編集</button>
       </div>
     </aside>
 
@@ -60,10 +69,27 @@
 
     <!-- Histogram toggle button -->
     <button class="histogram-toggle" id="histogram-toggle">📊 ヒストグラム</button>
+
+    <!-- Preset editor modal -->
+    <div class="preset-modal" id="preset-modal" style="display: none;">
+      <div class="preset-dialog">
+        <header class="preset-dialog-header">
+          <h2>カテゴリプリセット編集</h2>
+          <button class="preset-close" data-pe="close" aria-label="閉じる">×</button>
+        </header>
+        <div class="preset-list" data-pe="list"></div>
+        <footer class="preset-dialog-footer">
+          <button class="action-btn" data-pe="add">+ 追加</button>
+          <button class="action-btn" data-pe="reset">デフォルトに戻す</button>
+          <button class="action-btn" data-pe="close">閉じる</button>
+        </footer>
+      </div>
+    </div>
   </div>
 
   <script>window.FH = {};</script>
   <script src="js/color-converter.js"></script>
+  <script src="js/color-presets.js"></script>
   <script src="js/color-classifier.js"></script>
   <script src="js/canvas-renderer.js"></script>
   <script src="js/image-loader.js"></script>
@@ -71,6 +97,7 @@
   <script src="js/histogram-analyzer.js"></script>
   <script src="js/histogram-panel.js"></script>
   <script src="js/area-report.js"></script>
+  <script src="js/preset-editor.js"></script>
   <script>
     (function () {
       'use strict';
@@ -85,9 +112,13 @@
       var areaReport = document.getElementById('area-report');
       var printButton = document.getElementById('print-report');
       var reportActions = document.getElementById('report-actions');
+      var presetModal = document.getElementById('preset-modal');
+      var openPresetBtn = document.getElementById('open-preset-editor');
 
+      FH.ColorPresets.load();
       FH.HistogramPanel.init(histogramPanel, histogramToggle);
       FH.AreaReport.init(areaReport, printButton);
+      FH.PresetEditor.init(openPresetBtn, presetModal);
 
       FH.ImageLoader.init(fileInput, dropZone, function (image) {
         FH.CanvasRenderer.render(canvas, image);
@@ -99,7 +130,7 @@
         FH.HistogramPanel.render(histData);
 
         FH.AreaReport.analyze(fullData);
-        reportActions.style.display = 'block';
+        reportActions.style.display = 'flex';
       });
 
       FH.PixelInspector.init(canvas, infoPanel);

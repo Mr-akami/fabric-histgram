@@ -10,6 +10,7 @@ beforeAll(() => {
   window.FH = {};
   loadModules([
     'js/color-converter.js',
+    'js/color-presets.js',
     'js/color-classifier.js',
     'js/canvas-renderer.js',
     'js/pixel-inspector.js',

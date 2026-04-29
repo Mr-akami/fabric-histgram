@@ -1,12 +1,18 @@
-import { describe, test, expect, beforeAll } from 'vitest';
+import { describe, test, expect, beforeAll, beforeEach } from 'vitest';
 import { loadModules } from './helpers/load-script.js';
 
 beforeAll(() => {
   window.FH = {};
   loadModules([
     'js/color-converter.js',
+    'js/color-presets.js',
     'js/color-classifier.js',
   ]);
+});
+
+beforeEach(() => {
+  window.localStorage.clear();
+  FH.ColorPresets._resetMemory();
 });
 
 describe('FH.ColorClassifier.classify', () => {
@@ -198,11 +204,11 @@ describe('FH.ColorClassifier.classify', () => {
 });
 
 describe('FH.ColorClassifier.CATEGORIES', () => {
-  test('should expose all 9 categories', () => {
+  test('should expose 9 stored presets + OTHER fallback', () => {
     const categories = FH.ColorClassifier.CATEGORIES;
 
     expect(categories).toBeInstanceOf(Array);
-    expect(categories.length).toBe(9);
+    expect(categories.length).toBe(10);
   });
 
   test('should contain all expected category keys', () => {
@@ -217,12 +223,20 @@ describe('FH.ColorClassifier.CATEGORIES', () => {
     expect(keys).toContain('green');
     expect(keys).toContain('blue');
     expect(keys).toContain('purple');
+    expect(keys).toContain('other');
   });
 
   test('should have name property on each category', () => {
     FH.ColorClassifier.CATEGORIES.forEach(function (cat) {
       expect(typeof cat.name).toBe('string');
       expect(cat.name.length).toBeGreaterThan(0);
+    });
+  });
+
+  test('should expose displayColor on each category', () => {
+    FH.ColorClassifier.CATEGORIES.forEach(function (cat) {
+      expect(typeof cat.displayColor).toBe('string');
+      expect(cat.displayColor.charAt(0)).toBe('#');
     });
   });
 });

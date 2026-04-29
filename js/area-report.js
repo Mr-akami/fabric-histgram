@@ -3,6 +3,7 @@
 
   var reportContainer;
   var printButton;
+  var lastImageData = null;
 
   /**
    * @param {HTMLElement} container - element to render report into
@@ -15,10 +16,26 @@
     printButton.addEventListener('click', function () {
       window.print();
     });
+
+    if (FH.ColorPresets) {
+      FH.ColorPresets.subscribe(function () {
+        if (lastImageData) analyze(lastImageData);
+      });
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   /** @param {{ data: Uint8ClampedArray, width: number, height: number }} imageData */
   function analyze(imageData) {
+    lastImageData = imageData;
+
     var data = imageData.data;
     var pixelCount = data.length / 4;
 
@@ -39,13 +56,14 @@
     }
 
     var html = '<h2>面積率レポート</h2><table class="area-report-table">';
-    html += '<tr><th>カテゴリ</th><th>面積率</th></tr>';
+    html += '<tr><th></th><th>カテゴリ</th><th>面積率</th></tr>';
 
     for (var j = 0; j < categories.length; j++) {
-      var cat = categories[j];
-      var pct = (counts[cat.key] / pixelCount) * 100;
+      var c = categories[j];
+      var pct = (counts[c.key] / pixelCount) * 100;
       var display = pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1);
-      html += '<tr><td>' + cat.name + '</td><td>' + display + '%</td></tr>';
+      var swatch = '<span class="swatch" style="background:' + escapeHtml(c.displayColor) + '"></span>';
+      html += '<tr><td>' + swatch + '</td><td>' + escapeHtml(c.name) + '</td><td>' + display + '%</td></tr>';
     }
 
     html += '</table>';
